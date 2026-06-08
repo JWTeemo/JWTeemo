@@ -1,0 +1,39 @@
+import base64
+
+private_key_pem = b"""-----BEGIN RSA PRIVATE KEY-----
+MIIEogIBAAKCAQEAtriGXiFuNOEAuEoHQUfXO5xYziMc2EhdbyY9HU5Sedcu02qB
+/FdtQo2ZPVVQ46JrhPsh3jksMiDr8pHcr6/J8j0Zno/uDD7wcZWMZyTRaAFJeThE
+KVf6j3egC2z+ZpPKCQn4xG07bClFx94fmtpovoCDi2RvgrGMt/sIqqKIoCuPCd5p
+aFyFnk5sYds8LvYSfZw8U7b3/k2RtcGMhnCWqjK9v8oADQ9bhxyODxVRFPH6aOGK
+bh5QMGiKwnbXWE+WY9e34owK/I2yVjCkshEpjqFK9tU4uspEmYKMzIGujzSWlfYX
+EMybs3tfFpbXCIySOT6nBSTHTUHSNX9Lhd/kZwIDAQABAoIBABdiJ/f16UelH9V1
+y9Xj3ryHNqoyvidDo4ls6FdOxalIC3sM31Ou0JG600iRGYf4KjBbfysUP/6uTeO+
+HPLy2TJB9XxgSQOSLm0qyUwN3yqjN4bm13o/AxbHJVkw+qGf+jQL7aUdoYQnCAIb
+AApuNwdiJPN6x/Z+yFZnLuW/ZSKyGM4ijCWdYOE5L//yMQJsxI6fcxtG6rdeOFDr
+CaCnBRC6KImKDvouZCoS/f4ixIAocYy0wMF34L+o4uKFrO/IpnZHDUiC343FDcsp
+kXcK3Q1IwN98jch703/O6Zrpl7+4rTYCjpb8t/ke7wNaIbLl8ZBp5oui2lK1EFhS
+1bff0hkCgYEA64toSndypqAz69dFt6+1JeRr+AGq4zO11WD3H2f1+b3G+YOX6pjg
+WfDF8GkcMsIQtmqEjVFl5bNX9sMVxke/oA6MxvXtvbvk/laIrShUs/S0qts2gSrX
+1wR9yvOrolSjJd3clI4mvnPrXzVVuLGPx5wBUiqHQp9phgNvnoDJRXUCgYEAxpa/
+TrSNffiEA8m7L1FiOc+M8buBQsgPq/85BsiQ9vmxG5Jn+PAJVGnkNkL2YeenIJzF
+Re8wyzNsQP3tbg45gyukoeHHHA9IuGMuli4gFcDRLhh2ijvd6rVz0cFL6LhvCt88
+3j9F9fonsmcYXkFEBN9eoj64UbAXgpOT/l+qWusCgYAI3deQLgznztIFh7X9IyUb
+hwy1akKniNPIc3z59qzguM8bp2N5lkWjvReGZD6Gfp2ocDwLIcxHKEggZtmT/DFv
+cfzEpI9NfBwzoshEVGdT2ttOLzBPDnDPjEC7+g407yCxFTfvc6ZrtuteSyCt8ikq
+Z2n5UNaEoIGVZN23xrtM3QKBgEmlPe0CKDa/IrYE6dXyaGrn/WzoDFenuagfThal
+6pysnHGNKeG3or4bRvaYfqZwMhp2CPKWcZHp0AuKH7Lgs5Nha/xcrmpJgL5gibZI
+BL4Mc4aUq+E3smSIRhtTg8MaIpP1la0V6ev+iRowAWly6raj34Rrng8tLorOD+QV
+tidhAoGAVWw82ivopp9IuYyyVmP1JfVLaG93mNsdECKVZ6LzKPnqTuMtp8KUzofO
+q+KLzwDIqnVGxrgoFisQYCJT/j3gD1CTpROsBNo0nSFW5nIIHO0hPMz8GTtTHXol
+OmG9yK5I2MBqGr+Zu0hHUMpsvssXcsmg9TQmywZpAIm2So9AJJQ=
+-----END RSA PRIVATE KEY-----"""
+
+private_oct = b"qd6ZaXP-e6PlMthTpaTc2NAcsTsVKGpT54tTTJi9Mo4"
+def b64url_decode(data):
+    padding = b'=' * (-len(data) % 4)  # 补足base64长度
+    return base64.urlsafe_b64decode(data + padding)
+
+
+def main(type):
+    if type == b"1":
+        return private_key_pem

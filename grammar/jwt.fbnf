@@ -1,0 +1,146 @@
+Key = JWS_ES() / JWS_RSA() / JWS_PS() / JWS_EdDSA() / JWS_ES256K() / JWS_OCT_256() / JWS_OCT_384() / JWS_OCT_512() / JWE_RSA() / JWE_OCT_128() / JWE_OCT_192() / JWE_OCT_256() / JWE_OCT_384() / JWE_OCT_512() / JWE_PASS() / JWE_EC()
+
+jwt = jws / jwe
+jws = compactjws / jsonjws
+compactjws = b64jwsheader "." b64payload "." signature
+jsonjws = json_encode(
+              map("protected", b64jwsheader) ","
+              map("payload", b64payload) ","
+              map("header", unpheader) ","
+              map("signature", signature)
+          )
+signature = base64_encode(
+                if(jwsalg_value,{
+                    "none": "",
+                    "HS256": HS256(Key, b64jwsheader "." b64payload),
+                    "HS384": HS384(Key, b64jwsheader "." b64payload),
+                    "HS512": HS512(Key, b64jwsheader "." b64payload),
+                    "RS256": RS256(Key, b64jwsheader "." b64payload),
+                    "RS384": RS384(Key, b64jwsheader "." b64payload),
+                    "RS512": RS512(Key, b64jwsheader "." b64payload),
+                    "ES256": ES256(Key, b64jwsheader "." b64payload),
+                    "ES384": ES384(Key, b64jwsheader "." b64payload),
+                    "ES512": ES512(Key, b64jwsheader "." b64payload),
+                    "PS256": PS256(Key, b64jwsheader "." b64payload),
+                    "PS384": PS384(Key, b64jwsheader "." b64payload),
+                    "PS512": PS512(Key, b64jwsheader "." b64payload),
+                    "EdDSA": EdDSA(Key, b64jwsheader "." b64payload),
+                    "ES256K": ES256K(Key, b64jwsheader "." b64payload)
+                })
+            )
+b64jwsheader = base64_encode(json_encode(jwsheader))
+b64payload = base64_encode(json_encode(payload))
+jwsheader = jwsalg_claim *("," claim)
+payload = map("pad.","pad.") *("," claim)
+claim = kid_claim / iss_claim / sub_claim / exp_claim / iat_claim / aud_claim
+unpheader = json_encode(map("pad.","pad."))
+jwsalg_claim = map("alg", jwsalg_value)
+jwsalg_value = "none" / "HS256" / "HS384" / "HS512" / "RS256" / "RS384" / "RS512" / "ES256" / "ES384" / "ES512" / "PS256" / "PS384" / "PS512" / "EdDSA" / "ES256K"
+
+jwe = compactjwe / jsonjwe
+compactjwe = b64jweheader "." b64EncKey "." b64IV "." b64Cipher "." b64Tag
+jsonjwe = json_encode(
+                    map("protected", b64jweheader) ","
+                    map("ciphertext", b64Cipher) ","
+                    map("header", unpjweheader) ","
+                    map("encrypted_key", b64EncKey) ","
+                    map("iv", b64IV) ","
+                    map("tag", b64Tag)
+          )
+
+unpjweheader = json_encode(map("pad..","pad..") ["," kid_claim] ["," iss_claim] ["," sub_claim] ["," exp_claim] ["," aud_claim])
+b64jweheader = base64_encode(json_encode(jweheader))
+jweheader = jwealg_claim ","  enc_claim  "," p2s_claim "," p2c_claim ["," iv_claim] ["," tag_claim] ["," epk_claim] ["," zip_claim] *("," claim)
+zip_claim = map("zip", zip_value)
+zip_value = "DEF"
+jwealg_claim = map("alg", jwealg_value)
+jwealg_value = "RSA-OAEP" / "RSA-OAEP-256" / "A128KW" / "A192KW" / "A256KW" / "dir" / "ECDH-ES" / "ECDH-ES+A128KW" / "ECDH-ES+A192KW" / "ECDH-ES+A256KW" / "A128GCMKW" / "A192GCMKW" / "A256GCMKW" / "PBES2-HS256+A128KW" / "PBES2-HS384+A192KW" / "PBES2-HS512+A256KW"
+enc_claim = map("enc", enc_value)
+enc_value = "A128GCM" / "A192GCM" / "A256GCM" / "A128CBC-HS256" / "A192CBC-HS384" / "A256CBC-HS512"
+EncKey = if(jwealg_value,{
+                "RSA-OAEP": RSA-OAEP(Key, CEK),
+                "RSA-OAEP-256": RSA-OAEP-256(Key, CEK),
+                "A128KW": A128KW(Key, CEK),
+                "A192KW": A192KW(Key, CEK),
+                "A256KW": A256KW(Key, CEK),
+                "A128GCMKW": A128GCMKW(Key, CEK, headeriv),
+                "A192GCMKW": A192GCMKW(Key, CEK, headeriv),
+                "A256GCMKW": A256GCMKW(Key, CEK, headeriv),
+                "dir": "",
+                "ECDH-ES": "",
+                "ECDH-ES+A128KW": ECDH-ES-A128KW(Key, CEK),
+                "ECDH-ES+A192KW": ECDH-ES-A192KW(Key, CEK),
+                "ECDH-ES+A256KW": ECDH-ES-A256KW(Key, CEK),
+                "PBES2-HS256+A128KW": PBES2-HS256-A128KW(Key, CEK, p2s),
+                "PBES2-HS384+A192KW": PBES2-HS384-A192KW(Key, CEK, p2s),
+                "PBES2-HS512+A256KW": PBES2-HS512-A256KW(Key, CEK, p2s)
+            }
+        )
+
+PlainText = if(CheckCompress(jweheader),{
+    "True": Compress(json_encode(payload)),
+    "False": json_encode(payload)
+})
+Cipher = if(enc_value,{
+                "A128GCM": A128GCM(CEK, PlainText, IV, b64jweheader),
+                "A192GCM": A192GCM(CEK, PlainText, IV, b64jweheader),
+                "A256GCM": A256GCM(CEK, PlainText, IV, b64jweheader),
+                "A128CBC-HS256": A128CBC-HS256(CEK, PlainText, IV, b64jweheader),
+                "A192CBC-HS384": A192CBC-HS384(CEK, PlainText, IV, b64jweheader),
+                "A256CBC-HS512": A256CBC-HS512(CEK, PlainText, IV, b64jweheader)
+                }
+            )
+b64IV = base64_encode(IV)
+b64Cipher = base64_encode(ExtractCipher(Cipher, enc_value))
+b64Tag = base64_encode(ExtractTag(Cipher, enc_value))
+
+JWE-ECDH = ECDH-ES(Key, enc_value)
+epk_claim = map("epk",
+            if (jwealg_value, {
+                "ECDH-ES+A128KW": ExtractEPK(EncKey),
+                "ECDH-ES+A192KW": ExtractEPK(EncKey),
+                "ECDH-ES+A256KW": ExtractEPK(EncKey),
+                else: ExtractEPK(JWE-ECDH)
+            })
+            )
+
+CEK = if(jwealg_value, {
+        "dir": Key,
+        "ECDH-ES": ExtractCEK(JWE-ECDH),
+        else: generate_cek(enc_value)
+      })
+IV = generate_iv(enc_value)
+
+b64EncKey = if(jwealg_value,{
+                    "A128GCMKW": base64_encode(ExtractCipher(EncKey, "A128GCMKW")),
+                    "A192GCMKW": base64_encode(ExtractCipher(EncKey, "A192GCMKW")),
+                    "A256GCMKW": base64_encode(ExtractCipher(EncKey, "A256GCMKW")),
+                    "ECDH-ES+A128KW": ExtractEncKey(EncKey),
+                    "ECDH-ES+A192KW": ExtractEncKey(EncKey),
+                    "ECDH-ES+A256KW": ExtractEncKey(EncKey),
+                    else: base64_encode(EncKey)
+                })
+
+iv_claim = map("iv", base64_encode(headeriv))
+headeriv = generate_iv("GCM")
+tag_claim = map("tag", base64_encode(headertag))
+p2s_claim = map("p2s", base64_encode(p2s))
+p2s = generate_iv("PBES2")
+p2c_claim = map("p2c", p2c_value)
+p2c_value = "1000"
+headertag = if (jwealg_value, {
+                "A128GCMKW": ExtractTag(EncKey, "A128GCM"),
+                "A192GCMKW": ExtractTag(EncKey, "A192GCM"),
+                "A256GCMKW": ExtractTag(EncKey, "A256GCM"),
+                else: 16(tchar)
+            })
+kid_claim = map("kid", *tchar)
+iss_claim = map("iss", *tchar)
+sub_claim = map("sub", *tchar)
+aud_claim = map("aud", *tchar)
+exp_claim = map("exp", jwt_timestamp())
+iat_claim = map("iat", jwt_timestamp())
+
+tchar = "." / "^" / "_" / "`" / "|" / "~" / DIGIT / ALPHA
+DIGIT = %x30-39
+ALPHA = %x41-5A / %x61-7A

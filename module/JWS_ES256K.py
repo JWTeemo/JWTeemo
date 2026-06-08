@@ -1,0 +1,2 @@
+def main():
+    return b'-----BEGIN PRIVATE KEY-----\nMIGEAgEAMBAGByqGSM49AgEGBSuBBAAKBG0wawIBAQQgsvhVPt31LjaMNNdphHcI\nYgNxok8jiG1gO60U7Sc2nQ6hRANCAAS02zvHBZBgqtXyQnT+ePWbur/tLPVhEonD\ntcxoBe2aHQQd2QoQSytKHVg6oy5S8qljiTrwVZSq2TdFQtiv7YPJ\n-----END PRIVATE KEY-----\n'
